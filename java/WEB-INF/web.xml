@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<context-param>
+		<param-name>debug</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
+	<session-config>  <!--  30 minutes -->
+		<session-timeout>30</session-timeout>
+	</session-config>
+
+
+	<servlet>
+		<display-name>Login</display-name>
+		<servlet-name>Login</servlet-name>
+		<servlet-class>chat.Login</servlet-class>
+		<init-param>
+			<param-name>sleep-time-in-seconds</param-name>
+			<param-value>10</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>Login</servlet-name>
+		<url-pattern>/Login</url-pattern>
+	</servlet-mapping>
+
+
+
+	<servlet>
+		<display-name>GetMessages</display-name>
+		<servlet-name>GetMessages</servlet-name>
+		<servlet-class>chat.GetMessages</servlet-class>
+		<init-param>
+			<param-name>sleep-time-in-seconds</param-name>
+			<param-value>10</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>GetMessages</servlet-name>
+		<url-pattern>/GetMessages</url-pattern>
+	</servlet-mapping>
+
+
+
+	<servlet>
+		<display-name>PostMessage</display-name>
+		<servlet-name>PostMessage</servlet-name>
+		<servlet-class>chat.PostMessage</servlet-class>
+		<init-param>
+			<param-name>sleep-time-in-seconds</param-name>
+			<param-value>10</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>PostMessage</servlet-name>
+		<url-pattern>/PostMessage</url-pattern>
+	</servlet-mapping>
+
+
+
+	<servlet>
+		<display-name>GetUsers</display-name>
+		<servlet-name>GetUsers</servlet-name>
+		<servlet-class>chat.GetUsers</servlet-class>
+		<init-param>
+			<param-name>sleep-time-in-seconds</param-name>
+			<param-value>10</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>GetUsers</servlet-name>
+		<url-pattern>/GetUsers</url-pattern>
+	</servlet-mapping>
+</web-app>
