@@ -20,7 +20,7 @@ public class PostMessage extends HttpServlet {
 
 		try{
 			String newMessage = request.getParameter("msg");
-			Integer userid = (Integer)session.getValue("userid");
+			Integer userid = (Integer) session.getAttribute("userid");
 
 			if(userid != null){
 				database = new DB();

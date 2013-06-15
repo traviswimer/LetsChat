@@ -13,28 +13,38 @@ var chat = (function(){
 	var postMessageURL = "PostMessage";
 	var usersURL = "GetUsers";
 
-	// Array of users already in the list
-	var currentUsers = [];
-
 	// ID of last message recieved
 	var lastMsgId = 0;
 
 	// Adds a chat message to the chat feed
-	function addChatMessage(username, message){
-		$('#chat-feed').append("<div>"+username+" - "+message+"</div>");
+	function addChatMessage(userid, username, message){
+		// Create contents of message
+		var userMsgName = document.createElement('div');
+		userMsgName.className = "msg-user";
+		userMsgName.innerHTML = username;
+		var userImg = document.createElement('img');
+		userImg.className = "msg-img";
+		userImg.src = "user_images/"+userid+".jpg";
+		var userMsg = document.createElement('div');
+		userMsg.className = "msg-text";
+		userMsg.innerHTML = message;
+
+		var msgDiv = document.createElement('div');
+		msgDiv.className = "msg-box";
+		msgDiv.appendChild(userMsgName);
+		msgDiv.appendChild(userImg);
+		msgDiv.appendChild(userMsg);
+
+		document.getElementById('chat-feed').appendChild(msgDiv);
+
+		// scroll to bottom
+		var feed = document.getElementById("chat-feed");
+		feed.scrollTop = feed.scrollHeight;
 	}
 
 	// adds a user to the user list
 	function addUser(userInfo){
-		$('#chatters-list').append('<img id="user-pic-'+userInfo.id+'" class="chatter" src="user_images/1.jpg">');
-	}
-
-	// adds a user to the user list
-	function removeUser(userId){
-		var userPic = document.getElementById('user-pic-'+userId);
-		if(userPic){
-			userPic.parentNode.removeChild(userPic);
-		}
+		$('#chatters-list').append('<img id="user-pic-'+userInfo.id+'" class="chatter" src="user_images/'+userInfo.id+'.jpg">');
 	}
 
 	// Retrieves new chat messages from the server
@@ -54,20 +64,11 @@ var chat = (function(){
 					lastMsgId = messages[0].msgId;
 
 					// Loop through all new messages
-					for(var i=0; i<messages.length; i++){
+					for(var i=messages.length-1; i>=0; i--){
 						var theMessage = messages[i];
 
-						// Add user to list if not already in list
-						if( $.inArray(theMessage.name, currentUsers) === -1 ){
-							/*addUser({
-								id: theMessage.userid,
-								name: theMessage.user
-							});
-							currentUsers.push(theMessage.userid);*/
-						}
-
 						// Add message to the feed
-						addChatMessage(theMessage.user, theMessage.text);
+						addChatMessage(theMessage.userid, theMessage.user, theMessage.text);
 					}
 				}
 
@@ -80,24 +81,14 @@ var chat = (function(){
 		$.get(usersURL, function(data){
 			if(data && data.users){
 				var users = data.users;
-				var i;
-
+				$('#chatters-list').html("");
 				for(i=0; i<users.length; i++){
 					var theUser = users[i];
 
 					// Add user to list if not already in list
-					if( $.inArray(theUser.id, currentUsers) === -1 ){
-						addUser(theUser);
-						currentUsers.push(theUser.id);
-					}
+					addUser(theUser);
 				}
 
-				// remove users no longer active
-				var usersToRemove = arrayDifference(currentUsers, users);
-				for(i=0; i<usersToRemove.length; i++){
-					removeUser(usersToRemove[i]);
-				}
-				currentUsers = users;
 			}
 		}, "json");
 	}
@@ -121,8 +112,8 @@ var chat = (function(){
 		updateChatFeed();
 		updateUsers();
 
-		setInterval(updateChatFeed, 2000);
-		setInterval(updateUsers, 30000);
+		setInterval(updateChatFeed, 1000);
+		setInterval(updateUsers, 5000);
 
 
 		$('#chat-post-form').submit(function(e){

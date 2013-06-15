@@ -4,7 +4,7 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
-		<form id="login-form" method="post" action="register.jsp">
+		<form id="login-form" method="post" action="Register" enctype="multipart/form-data">
 			<h1>Sign-up to Chat!</h1>
 			<%
 				String error = request.getParameter("error");
@@ -19,6 +19,9 @@
 			</div>
 			<div>
 				<input type="password" placeholder="Password" name="password" class="text-field input-bottom">
+			</div>
+			<div>
+				<label>Upload an image</label><input type="file" name="image">
 			</div>
 			<div>
 				<input type="submit" value="Register" class="login-btn">

@@ -1,4 +1,10 @@
-<!DOCTYPE html>
+<%
+	String username = (String) session.getAttribute("username");
+	Integer userid = (Integer) session.getAttribute("userid");
+	if(userid == null){
+		response.sendRedirect("index.jsp");
+	}
+%><!DOCTYPE html>
 	<head>
 		<title>Let's Chat</title>
 		<link rel="stylesheet" type="text/css" href="style.css">
@@ -18,6 +24,11 @@
 			</div>
 			<div class="right-col">
 				<div id="chat-title">Let's Chat!</div>
+				<div id="user-info">
+					<img src="user_images/<%= userid %>.jpg" height="20" width="20">
+				<%
+					out.println(username);
+				%>(<a href="Logout">logout</a>)</div>
 				<div id="chatters-list">
 				</div>
 			</div>

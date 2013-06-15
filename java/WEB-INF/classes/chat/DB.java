@@ -2,6 +2,7 @@ package chat;
 
 import java.sql.*;
 import java.util.Date;
+import java.security.*;
 
 public class DB{
 
@@ -28,15 +29,14 @@ public class DB{
 	}
 
 	// creates a new user
-	public boolean createUser(String username, String password) throws Exception{
+	public long createUser(String username, String password) throws Exception{
 		try{
 			// Check if username already taken
 			if( !userExists(username) ){
-				if(insertUser(username, password)){
-					return true;
-				}
+				long userId = insertUser(username, password);
+				return userId;
 			}
-			return false;
+			return -1;
 
 		}catch(Exception e){
 			throw e;
@@ -45,16 +45,22 @@ public class DB{
 
 	// Determines if a username/password combination is correct
 	public int authenticateUser(String username, String password) throws Exception{
-		preparedStatement = con.prepareStatement("SELECT COUNT(*) AS `row_count`, `userid` FROM `users` WHERE `username` = ? AND `password` = ? LIMIT 1");
-		preparedStatement.setString(1, username);
-		preparedStatement.setString(2, password);
-		results = preparedStatement.executeQuery();
+		try{
+			String hashedPass = sha512ify(password);
 
-		results.first();
+			preparedStatement = con.prepareStatement("SELECT COUNT(*) AS `row_count`, `userid` FROM `users` WHERE `username` = ? AND `password` = ? LIMIT 1");
+			preparedStatement.setString(1, username);
+			preparedStatement.setString(2, hashedPass);
+			results = preparedStatement.executeQuery();
 
-		if( results.getInt("row_count") > 0 ){
-			return results.getInt("userid");
-		}else{
+			results.first();
+
+			if( results.getInt("row_count") > 0 ){
+				return results.getInt("userid");
+			}else{
+				return -1;
+			}
+		}catch(NoSuchAlgorithmException e){
 			return -1;
 		}
 	}
@@ -73,7 +79,7 @@ public class DB{
 		}
 	}
 
-	// retrieves an array of chat messages posted since timestamp
+	// retrieves an array of chat messages posted since the last message received
 	public ResultSet getMessages(int lastMsgId) throws SQLException{
 		preparedStatement = con.prepareStatement("SELECT * FROM `messages` LEFT JOIN `users` ON users.userid=messages.userid WHERE `messageid`>? ORDER BY `messageid` DESC LIMIT 25");
 		preparedStatement.setInt(1, lastMsgId);
@@ -98,12 +104,12 @@ public class DB{
 		}
 	}
 
-	// retrieves an array of chat messages posted since timestamp
+	// retrieves an array users who posted in the past 10 minutes
 	public ResultSet getUsers() throws SQLException{
 		java.util.Date date = new java.util.Date();
-	 	Timestamp anHourAgo = new Timestamp( System.currentTimeMillis() - (10 * 60 * 1000) );
+	 	java.sql.Timestamp anHourAgo = new java.sql.Timestamp( System.currentTimeMillis() - (10 * 60 * 1000) );
 
-		preparedStatement = con.prepareStatement("SELECT * FROM `messages` LEFT JOIN `users` ON users.userid=messages.userid WHERE `time` > ?");
+		preparedStatement = con.prepareStatement("SELECT * FROM `messages` LEFT JOIN `users` ON users.userid=messages.userid WHERE `time` > ? GROUP BY messages.userid");
 		preparedStatement.setTimestamp(1, anHourAgo);
 		results = preparedStatement.executeQuery();
 
@@ -138,17 +144,57 @@ public class DB{
 
 
 	// Add user to database
-	private boolean insertUser(String username, String password) throws SQLException{
-		preparedStatement = con.prepareStatement("INSERT INTO `users` (`username`, `password`) VALUES (?, ?)");
-		preparedStatement.setString(1, username);
-		preparedStatement.setString(2, password);
-		int success = preparedStatement.executeUpdate();
-		
-		if(success > 0){
-			return true;
-		}else{
-			return false;
+	private long insertUser(String username, String password) throws SQLException{
+		try{
+			String hashedPass = sha512ify(password);
+
+			preparedStatement = con.prepareStatement("INSERT INTO `users` (`username`, `password`) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+			preparedStatement.setString(1, username);
+			preparedStatement.setString(2, hashedPass);
+			int success = preparedStatement.executeUpdate();
+			
+			if(success > 0){
+				ResultSet keys = preparedStatement.getGeneratedKeys();
+				if (keys != null && keys.first()) {
+	    			long key = keys.getLong(1);
+					return key;
+				}else{
+					return -1;
+				}
+			}else{
+				return -1;
+			}
+		}catch(NoSuchAlgorithmException e){
+			return -1;
 		}
 	}
+
+
+	// Creates a password hash
+	private String sha512ify(String password) throws NoSuchAlgorithmException{
+		MessageDigest digester;
+		try{
+			digester = MessageDigest.getInstance("SHA-512");
+
+			digester.update(password.getBytes());
+			byte[] byteArray = digester.digest();
+			String hashedPassword = "";
+
+			for( int i = 0; i < byteArray.length; i++ ){
+				String hexString = Integer.toHexString( new Byte(byteArray[i]) );
+				while (hexString.length() < 2) {
+					hexString = "0" + hexString;
+				}
+				hexString = hexString.substring(hexString.length() - 2);
+				hashedPassword += hexString;
+			}
+			return hashedPassword;
+
+		}catch(NoSuchAlgorithmException e) {
+			throw e;
+		}
+	}
+
+
 
 }

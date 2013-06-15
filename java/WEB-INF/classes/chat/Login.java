@@ -24,16 +24,15 @@ public class Login extends HttpServlet {
 			int result = database.authenticateUser(username, password);
 
 			if(result != -1){
-				session.putValue("userid", result);
+				session.setAttribute("userid", result);
+				session.setAttribute("username", username);
 				response.sendRedirect("chatroom.jsp");
 			}else{
 				response.sendRedirect("index.jsp");
 			}
 
 		}catch(Exception e){
-			PrintWriter output = response.getWriter();
-			output.println("ERROR: " + e);
-			//response.sendRedirect("index.jsp");
+			response.sendRedirect("index.jsp");
 		}finally{
 			try{
 				database.close();
