@@ -1,7 +1,31 @@
 (function(){
 
 // Check for document finished loading
-$(function($){
+$(function(){
+	$.ajaxSetup({
+		beforeSend: function(xhr, settings) {
+			function getCookie(name) {
+				var cookieValue = null;
+				if (document.cookie && document.cookie != '') {
+					var cookies = document.cookie.split(';');
+					for (var i = 0; i < cookies.length; i++) {
+						var cookie = jQuery.trim(cookies[i]);
+						// Does this cookie string begin with the name we want?
+					if (cookie.substring(0, name.length + 1) == (name + '=')) {
+						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+						break;
+					}
+				}
+			}
+			return cookieValue;
+			}
+			if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+				// Only send the token to relative URLs i.e. locally.
+				xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+			}
+		}
+	});
+
 	chat.init();
 });
 
@@ -24,7 +48,7 @@ var chat = (function(){
 		userMsgName.innerHTML = username;
 		var userImg = document.createElement('img');
 		userImg.className = "msg-img";
-		userImg.src = "user_images/"+userid+".jpg";
+		userImg.src = "/static/user_images/user.png";
 		var userMsg = document.createElement('div');
 		userMsg.className = "msg-text";
 		userMsg.innerHTML = message;
@@ -44,7 +68,7 @@ var chat = (function(){
 
 	// adds a user to the user list
 	function addUser(userInfo){
-		$('#chatters-list').append('<img id="user-pic-'+userInfo.id+'" class="chatter" src="user_images/'+userInfo.id+'.jpg">');
+		$('#chatters-list').append('<img id="user-pic-'+userInfo.id+'" class="chatter" src="/static/user_images/user.png">');
 	}
 
 	// Retrieves new chat messages from the server

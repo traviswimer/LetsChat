@@ -1,1 +1,32 @@
-<div>{{ username }}</div>
+<!DOCTYPE html>
+	<head>
+		<title>Let's Chat</title>
+        {% load staticfiles %}
+        <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
+	</head>
+	<body>
+		<div id="chat-container">
+			<div class="bg-box"></div>
+			<div class="left-col">
+				<div id="chat-feed">
+					Loading...
+				</div>
+				<div id="chat-input-container">
+					<form id="chat-post-form">
+						<input id="chat-msg-input" type="text" placeholder="Enter chat message...">
+					</form>
+				</div>
+			</div>
+			<div class="right-col">
+				<div id="chat-title">Let's Chat!</div>
+				<div id="user-info">
+					<img src="{% static "user_images/user.png" %}" height="20" width="20">
+				{{ username }}(<a href="/logout">logout</a>)</div>
+				<div id="chatters-list">
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="{% static "scripts/jquery-1.10.1.min.js" %}"></script>
+		<script type="text/javascript" src="{% static "scripts/chat.js" %}"></script>
+	</body>
+</html>

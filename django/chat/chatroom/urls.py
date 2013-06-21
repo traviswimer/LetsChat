@@ -6,7 +6,11 @@ urlpatterns = patterns(
     '',
     url(r'^$', views.index, name='index'),
     url(r'^registerForm/', views.register, name='register'),
-    url(r'^chatroom/', views.chatroom, name='chatroom'),
+    url(r'^chatroom/$', views.chatroom, name='chatroom'),
+    url(r'^chatroom/GetMessages', views.getMessages, name='getMessages'),
+    url(r'^chatroom/GetUsers', views.getUsers, name='getUsers'),
+    url(r'^chatroom/PostMessage', views.postMessage, name='postMessage'),
+    url(r'^logout', views.logout, name='logout'),
 
     # ex: /polls/5/
     #url(r'^(?P<poll_id>\d+)/$', views.detail, name='detail'),
