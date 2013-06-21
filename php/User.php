@@ -3,37 +3,53 @@ class User{
 	private $userid;
 	private $conn;
 
-	function __construct(DB $the_connection){
+	function __construct(DB $the_connection = null){
 		$this->conn = $the_connection ? $the_connection : null;
+		if( isset($_SESSION['userid']) ){
+			$this->userid = $_SESSION['userid'];
+		}
 	}
 
 	// Creates a new user in the database
 	public function register($username, $password, $image){
+
+		// Users should only be registering if they are not already logged in
+		if( isset($userid) ){
+			throw new Exception("You are already logged in");
+		}
 
 		// Make sure username/password are valid
 		if( empty($username) || empty($password) ){
 			throw new Exception("Invalid Username or Password");
 		}
 
-		// Add user to database
-		$statement = $this->conn->prepare(
-			'INSERT INTO 
-				`users` 
-				(
-					`username`, 
-					`password`
-				) 
-			VALUES 
-				(
-					:username, 
-					:password
-				)
-		');
-		$statement->bindParam(':username', $username, PDO::PARAM_STR, 20);
-		$statement->bindParam(':password', hash('sha512', $password), PDO::PARAM_STR, 128);
-		$statement->execute();
+		try{
+			// Add user to database
+			$statement = $this->conn->prepare(
+				'INSERT INTO 
+					`users` 
+					(
+						`username`, 
+						`password`
+					) 
+				VALUES 
+					(
+						:username, 
+						:password
+					)
+			');
+			$statement->bindParam(':username', $username, PDO::PARAM_STR, 20);
+			$statement->bindParam(':password', hash('sha512', $password), PDO::PARAM_STR, 128);
+			$statement->execute();
+		}catch(Exception $e){
+			// The username column is UNIQUE, so this is likely the error.
+			// If not, it's best not to reveal the actual SQL error to the 
+			// user anyway.
+			throw new Exception("This username is already taken.");
+		}
 
 		$new_users_id = $this->conn->lastInsertId();
+		$this->userid = $new_users_id;
 
 		// Sets the user as logged in
 		$_SESSION['userid'] = $new_users_id;
@@ -89,12 +105,50 @@ class User{
 
 	// logs in a user based on their username/password
 	public function login($username, $password){
+		// Users should only be loggin in if they are not already logged in
+		if( isset($userid) ){
+			throw new Exception("You are already logged in");
+		}
 
+		// Make sure username/password are valid
+		if( empty($username) || empty($password) ){
+			throw new Exception("Invalid Username or Password");
+		}
+
+		try{
+			// Check for user in database
+			$statement = $this->conn->prepare(
+				'SELECT 
+					`userid` 
+				FROM 
+					`users` 
+				WHERE 
+					`username`=:username
+					AND
+					`password`=:password
+			');
+			$statement->bindParam(':username', $username, PDO::PARAM_STR, 20);
+			$statement->bindParam(':password', hash('sha512', $password), PDO::PARAM_STR, 128);
+			$statement->execute();
+
+			$row_data = $statement->fetch(PDO::FETCH_ASSOC);
+
+			if( empty($row_data) ){
+				throw new Exception("Username or Password is incorrect");
+			}else{
+				$this->userid = $row_data['userid'];
+				$_SESSION['userid'] = $this->userid;
+			}
+		}catch(Exception $e){
+			throw $e;
+			throw new Exception("Error. Please try again.");
+		}
 	}
 
 	// clears the users session
 	public function logout(){
-
+		session_unset();
+		session_destroy();
 	}
 
 	public function __destruct(){
