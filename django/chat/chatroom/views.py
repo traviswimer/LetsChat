@@ -9,6 +9,8 @@ from chatroom.forms import LoginForm, RegisterForm
 
 from datetime import datetime, timedelta
 
+import hashlib
+
 
 
 def index(request):
@@ -21,7 +23,7 @@ def index(request):
             form = LoginForm(request.POST)
             if form.is_valid():
                 loginUsername = form.cleaned_data['username']
-                loginPassword = form.cleaned_data['password']
+                loginPassword = hashlib.sha512( form.cleaned_data['password'] ).hexdigest()
                 user_info = list( User.objects.filter(username=loginUsername, password=loginPassword) )
                 if len(user_info) > 0:
                     request.session['user_id'] = user_info[0].id
@@ -54,7 +56,7 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             newUsername = form.cleaned_data['username']
-            newPassword = form.cleaned_data['password']
+            newPassword = hashlib.sha512( form.cleaned_data['password'] ).hexdigest()
 
             user_info = list(User.objects.filter(username=newUsername))
             if len(user_info) <= 0:
