@@ -9,9 +9,9 @@ $(function($){
 var chat = (function(){
 
 	// URLs for sending ajax requests
-	var messageURL = "GetMessages";
-	var postMessageURL = "PostMessage";
-	var usersURL = "GetUsers";
+	var messageURL = "getMessages.php";
+	var postMessageURL = "postMessage.php";
+	var usersURL = "getUsers.php";
 
 	// ID of last message recieved
 	var lastMsgId = 0;
@@ -52,7 +52,7 @@ var chat = (function(){
 		$.get(messageURL, {lastMsgId: lastMsgId}, function(data){
 			if(data && data.messages){
 
-				// Remove loading message if response
+				// Remove loading message if first response
 				if(lastMsgId === 0){
 					$('#chat-feed').html('');
 				}
