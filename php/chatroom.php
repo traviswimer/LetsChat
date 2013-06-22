@@ -7,6 +7,9 @@
 	include('DB.php');
 	include('User.php');
 
+	$user = new User( new DB() );
+
+
 ?><!DOCTYPE html>
 	<head>
 		<title>Let's Chat</title>
@@ -29,7 +32,7 @@
 				<div id="chat-title">Let's Chat!</div>
 				<div id="user-info">
 					<img src="user_images/<?php echo $_SESSION['userid']; ?>.jpg" height="20" width="20">
-				<?php echo $_SESSION['userid']; ?>(<a href="logout.php">logout</a>)</div>
+				<?php echo $user->getUsername(); ?>(<a href="logout.php">logout</a>)</div>
 				<div id="chatters-list">
 				</div>
 			</div>
