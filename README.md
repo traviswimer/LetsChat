@@ -23,3 +23,6 @@ Created using JSP and Java Servlets/Classes. Utilizes a MySQL database for stora
 ## Django ##
 Uses Python and the Django framework. Data is stored using SQLite3. 
 PIL would not install on my windows environment, so this version does not include the image upload feature.
+
+## PHP ##
+Implemented using PHP and MySQL(PDO) for the database.
