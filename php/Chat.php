@@ -100,7 +100,7 @@ class Chat{
 			// fetch messages from database
 			$statement = $this->conn->prepare(
 				"SELECT 
-					users.uesrid  
+					users.userid  
 				FROM 
 					`messages` 
 				LEFT JOIN 
@@ -108,26 +108,25 @@ class Chat{
 				ON 
 					users.userid=messages.userid 
 				WHERE 
-					`time` > :anHourAgo 
+					`time` > (NOW() - INTERVAL 1 HOUR)
 				GROUP BY 
 					messages.userid
 				"
 			);
 
-			$an_hour_ago = time() - (60 * 60);
-			$statement->bindParam(':anHourAgo', $an_hour_ago, PDO::PARAM_INT, 30);
 			$statement->execute();
 
 			$user_data = $statement->fetchAll(PDO::FETCH_ASSOC);
 
 			$return_array = array();
 			foreach($user_data as $row){
-				array_push($row['userid']);
+				array_push($return_array, array("id"=>$row['userid']) );
 			}
 			
 			return $return_array;
 
 		}catch(Exception $e){
+			echo $e;
 			return array();
 		}
 
