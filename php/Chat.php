@@ -55,6 +55,84 @@ class Chat{
 
 	}
 
+
+
+	// posts a chat message for the user
+	public function postMessage($message){
+
+		if( empty($message) ){
+			return false;
+		}
+
+		try{
+			// fetch messages from database
+			$statement = $this->conn->prepare(
+				"INSERT INTO 
+					`messages` 
+					(
+						`userid`, 
+						`message`
+					) 
+				VALUES 
+					(
+						:userid, 
+						:message
+					)
+			");
+
+			$statement->bindParam(':userid', $this->userid, PDO::PARAM_INT, 11);
+			$statement->bindParam(':message', $message, PDO::PARAM_STR, 200);
+			$statement->execute();
+
+			return true;
+
+		}catch(Exception $e){
+			return false;
+		}
+
+	}
+
+
+	// retrieves a list of most recent chat messages
+	public function getUsers(){
+
+		try{
+			// fetch messages from database
+			$statement = $this->conn->prepare(
+				"SELECT 
+					users.uesrid  
+				FROM 
+					`messages` 
+				LEFT JOIN 
+					`users` 
+				ON 
+					users.userid=messages.userid 
+				WHERE 
+					`time` > :anHourAgo 
+				GROUP BY 
+					messages.userid
+				"
+			);
+
+			$an_hour_ago = time() - (60 * 60);
+			$statement->bindParam(':anHourAgo', $an_hour_ago, PDO::PARAM_INT, 30);
+			$statement->execute();
+
+			$user_data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+			$return_array = array();
+			foreach($user_data as $row){
+				array_push($row['userid']);
+			}
+			
+			return $return_array;
+
+		}catch(Exception $e){
+			return array();
+		}
+
+	}
+
 	public function __destruct(){
 		$this->connection = null;
 	}
