@@ -1,6 +1,7 @@
 <?php
 class User{
 	private $userid;
+	private $username;
 	private $conn;
 
 	function __construct(DB $the_connection = null){
@@ -149,6 +150,39 @@ class User{
 	public function logout(){
 		session_unset();
 		session_destroy();
+	}
+
+	// Returns a string of the user's username
+	public function getUsername(){
+		if( $this->username ){
+			return $this->username;
+		}
+
+		try{
+			// Check for user in database
+			$statement = $this->conn->prepare(
+				'SELECT 
+					`username` 
+				FROM 
+					`users` 
+				WHERE 
+					`userid`=:userid
+			');
+			$statement->bindParam(':userid', $this->userid, PDO::PARAM_INT, 11);
+			$statement->execute();
+
+			$row_data = $statement->fetch(PDO::FETCH_ASSOC);
+
+			if( empty($row_data) ){
+				throw new Exception("");
+			}else{
+				$this->username = $row_data['username'];
+			}
+			return $this->username;
+		}catch(Exception $e){
+			// Something broke, so we'll just call the user "friend"
+			return "Friend";
+		}
 	}
 
 	public function __destruct(){
